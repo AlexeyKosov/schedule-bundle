@@ -4,10 +4,12 @@ namespace Zenstruck\ScheduleBundle\EventListener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Zenstruck\ScheduleBundle\Event\BuildScheduleEvent;
+use Zenstruck\ScheduleBundle\Message\RunTaskMessage;
 use Zenstruck\ScheduleBundle\Schedule;
 use Zenstruck\ScheduleBundle\Schedule\Task;
 use Zenstruck\ScheduleBundle\Schedule\Task\CommandTask;
 use Zenstruck\ScheduleBundle\Schedule\Task\CompoundTask;
+use Zenstruck\ScheduleBundle\Schedule\Task\MessageTask;
 use Zenstruck\ScheduleBundle\Schedule\Task\PingTask;
 use Zenstruck\ScheduleBundle\Schedule\Task\ProcessTask;
 
@@ -40,7 +42,7 @@ final class TaskConfigurationSubscriber implements EventSubscriberInterface
 
     private function addTask(Schedule $schedule, array $config): void
     {
-        $task = $this->createTask($config['task']);
+        $task = $this->createTask($config['task'], $config['async']);
 
         $task->cron($config['frequency']);
 
@@ -91,16 +93,16 @@ final class TaskConfigurationSubscriber implements EventSubscriberInterface
         $schedule->add($task);
     }
 
-    private function createTask(array $commands): Task
+    private function createTask(array $commands, bool $async = false): Task
     {
         if (1 === \count($commands)) {
-            return self::createSingleTask(\array_values($commands)[0]);
+            return self::createSingleTask(\array_values($commands)[0], $async);
         }
 
         $task = new CompoundTask();
 
         foreach ($commands as $description => $command) {
-            $subTask = self::createSingleTask($command);
+            $subTask = self::createSingleTask($command, $async);
 
             if (!\is_numeric($description)) {
                 $subTask->description($description);
@@ -112,17 +114,21 @@ final class TaskConfigurationSubscriber implements EventSubscriberInterface
         return $task;
     }
 
-    private static function createSingleTask(string $command): Task
+    private static function createSingleTask(string $command, bool $async = false): Task
     {
         if (0 === \mb_strpos($command, self::PROCESS_TASK_PREFIX)) {
-            return new ProcessTask(self::removePrefix($command, self::PROCESS_TASK_PREFIX));
+            $task = new ProcessTask(self::removePrefix($command, self::PROCESS_TASK_PREFIX));
+        } elseif (0 === \mb_strpos($command, self::PING_TASK_PREFIX)) {
+            $task = new PingTask(self::removePrefix($command, self::PING_TASK_PREFIX));
+        } else {
+            $task = new CommandTask($command);
         }
 
-        if (0 === \mb_strpos($command, self::PING_TASK_PREFIX)) {
-            return new PingTask(self::removePrefix($command, self::PING_TASK_PREFIX));
+        if ($async) {
+            $task = new MessageTask($task);
         }
 
-        return new CommandTask($command);
+        return $task;
     }
 
     private static function removePrefix(string $value, string $prefix): string

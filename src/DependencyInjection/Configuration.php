@@ -125,6 +125,7 @@ final class Configuration implements ConfigurationInterface
                     'only_between' => '9-17',
                     'ping_on_success' => 'https://example.com/hourly-report-health-check',
                     'email_on_failure' => 'sales@example.com',
+                    'async' => true,
                 ],
             ])
             ->arrayPrototype()
@@ -249,6 +250,11 @@ final class Configuration implements ConfigurationInterface
                                 ->isRequired()
                             ->end()
                         ->end()
+                    ->end()
+                    ->booleanNode('async')
+                        ->info('Run this task through the messenger asynchronously')
+                        ->example(true)
+                        ->defaultFalse()
                     ->end()
                     ->append(self::createPingExtension('ping_before', 'Ping a url before task runs'))
                     ->append(self::createPingExtension('ping_after', 'Ping a url after task runs'))

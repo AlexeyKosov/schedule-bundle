@@ -4,6 +4,7 @@ namespace Zenstruck\ScheduleBundle\Schedule\Task;
 
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Stamp\StampInterface;
+use Zenstruck\ScheduleBundle\Message\RunTaskMessage;
 use Zenstruck\ScheduleBundle\Schedule\HasMissingDependencyMessage;
 use Zenstruck\ScheduleBundle\Schedule\Task;
 
@@ -14,27 +15,30 @@ use Zenstruck\ScheduleBundle\Schedule\Task;
  */
 final class MessageTask extends Task implements HasMissingDependencyMessage
 {
-    private $message;
+    /** @var Task */
+    private $originalTask;
+
+    /** @var StampInterface[] */
     private $stamps;
 
     /**
-     * @param object|Envelope  $message
+     * @param Task $originalTask
      * @param StampInterface[] $stamps
      */
-    public function __construct(object $message, array $stamps = [])
+    public function __construct(Task $originalTask, array $stamps = [])
     {
-        $this->message = $message;
+        $this->originalTask = $originalTask;
         $this->stamps = $stamps;
 
-        parent::__construct($this->messageClass());
+        parent::__construct((string)$originalTask);
     }
 
     /**
-     * @return object|Envelope
+     * @return Task
      */
-    public function getMessage(): object
+    public function getOriginalTask(): Task
     {
-        return $this->message;
+        return $this->originalTask;
     }
 
     /**
@@ -47,10 +51,8 @@ final class MessageTask extends Task implements HasMissingDependencyMessage
 
     public function getContext(): array
     {
-        $stamps = \array_merge(
-            $this->message instanceof Envelope ? \array_keys($this->message->all()) : [],
-            \array_map(static function(StampInterface $stamp) { return \get_class($stamp); }, $this->stamps)
-        );
+        $stamps = \array_map(static function(StampInterface $stamp) { return \get_class($stamp); }, $this->stamps);
+
         $stamps = \array_map(
             static function($stamp) {
                 return (new \ReflectionClass($stamp))->getShortName();
@@ -60,7 +62,7 @@ final class MessageTask extends Task implements HasMissingDependencyMessage
         $stamps = \implode(', ', \array_unique($stamps));
 
         return [
-            'Message' => $this->messageClass(),
+            'Message' => RunTaskMessage::class,
             'Stamps' => $stamps ?: '(none)',
         ];
     }
@@ -68,10 +70,5 @@ final class MessageTask extends Task implements HasMissingDependencyMessage
     public static function getMissingDependencyMessage(): string
     {
         return 'To use the message task you must install symfony/messenger (composer require symfony/messenger) and enable (config path: "zenstruck_schedule.messenger").';
-    }
-
-    private function messageClass(): string
-    {
-        return $this->message instanceof Envelope ? \get_class($this->message->getMessage()) : \get_class($this->message);
     }
 }

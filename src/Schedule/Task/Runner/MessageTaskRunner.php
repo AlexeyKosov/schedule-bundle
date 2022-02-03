@@ -6,6 +6,7 @@ use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\HandledStamp;
 use Symfony\Component\Messenger\Stamp\SentStamp;
+use Zenstruck\ScheduleBundle\Message\RunTaskMessage;
 use Zenstruck\ScheduleBundle\Schedule\Task;
 use Zenstruck\ScheduleBundle\Schedule\Task\MessageTask;
 use Zenstruck\ScheduleBundle\Schedule\Task\Result;
@@ -30,7 +31,9 @@ final class MessageTaskRunner implements TaskRunner
      */
     public function __invoke(Task $task): Result
     {
-        $envelope = $this->bus->dispatch($task->getMessage(), $task->getStamps());
+        $message = new RunTaskMessage($task->getId());
+
+        $envelope = $this->bus->dispatch($message, $task->getStamps());
         $output = $this->handlerOutput($envelope);
 
         if (empty($output)) {
