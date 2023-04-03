@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\Schedule;
 
 use Symfony\Component\Console\Helper\Helper;
@@ -9,9 +18,9 @@ use Symfony\Component\Console\Helper\Helper;
  */
 abstract class RunContext
 {
-    private $startTime;
-    private $duration;
-    private $memory;
+    private \DateTimeImmutable $startTime;
+    private ?int $duration = null;
+    private ?int $memory = null;
 
     public function __construct()
     {
@@ -56,7 +65,7 @@ abstract class RunContext
 
     final protected function markAsRun(int $memory): void
     {
-        $this->duration = \time() - $this->getStartTime()->getTimestamp();
+        $this->duration = \time() - $this->startTime->getTimestamp();
         $this->memory = $memory;
     }
 

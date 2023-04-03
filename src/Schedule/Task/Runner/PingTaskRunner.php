@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\Schedule\Task\Runner;
 
 use Symfony\Component\HttpClient\HttpClient;
@@ -15,6 +24,7 @@ use Zenstruck\ScheduleBundle\Schedule\Task\TaskRunner;
  */
 final class PingTaskRunner implements TaskRunner
 {
+    /** @var HttpClientInterface */
     private $httpClient;
 
     public function __construct(?HttpClientInterface $httpClient = null)
@@ -27,7 +37,7 @@ final class PingTaskRunner implements TaskRunner
     }
 
     /**
-     * @param PingTask|Task $task
+     * @param PingTask $task
      */
     public function __invoke(Task $task): Result
     {

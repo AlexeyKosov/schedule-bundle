@@ -1,9 +1,19 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\Schedule\Task;
 
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Command\LazyCommand;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\StringInput;
@@ -14,8 +24,11 @@ use Zenstruck\ScheduleBundle\Schedule\Task;
  */
 final class CommandTask extends Task
 {
+    /** @var string */
     private $name;
-    private $arguments;
+
+    /** @var string */
+    private $arguments = '';
 
     /**
      * @param string $name Command class or name (my:command)
@@ -75,7 +88,11 @@ final class CommandTask extends Task
         }
 
         foreach ($registeredCommands as $command) {
-            if ($this->name === \get_class($command)) {
+            $className = $command::class;
+            if ($command instanceof LazyCommand) {
+                $className = \get_class($command->getCommand());
+            }
+            if ($this->name === $className) {
                 return $command;
             }
         }

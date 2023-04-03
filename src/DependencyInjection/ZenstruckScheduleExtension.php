@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\DependencyInjection;
 
 use Symfony\Component\Config\FileLocator;
@@ -11,15 +20,18 @@ use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Process\Process;
+use Zenstruck\ScheduleBundle\Attribute\AsScheduledTask;
 use Zenstruck\ScheduleBundle\EventListener\ScheduleTimezoneSubscriber;
 use Zenstruck\ScheduleBundle\EventListener\TaskConfigurationSubscriber;
 use Zenstruck\ScheduleBundle\Schedule\Extension\EmailExtension;
 use Zenstruck\ScheduleBundle\Schedule\Extension\EnvironmentExtension;
 use Zenstruck\ScheduleBundle\Schedule\Extension\ExtensionHandler;
 use Zenstruck\ScheduleBundle\Schedule\Extension\Handler\EmailHandler;
+use Zenstruck\ScheduleBundle\Schedule\Extension\Handler\NotifierHandler;
 use Zenstruck\ScheduleBundle\Schedule\Extension\Handler\PingHandler;
 use Zenstruck\ScheduleBundle\Schedule\Extension\Handler\SingleServerHandler;
 use Zenstruck\ScheduleBundle\Schedule\Extension\Handler\WithoutOverlappingHandler;
+use Zenstruck\ScheduleBundle\Schedule\Extension\NotifierExtension;
 use Zenstruck\ScheduleBundle\Schedule\Extension\PingExtension;
 use Zenstruck\ScheduleBundle\Schedule\Extension\SingleServerExtension;
 use Zenstruck\ScheduleBundle\Schedule\ScheduleBuilder;
@@ -130,7 +142,31 @@ final class ZenstruckScheduleExtension extends ConfigurableExtension
             ;
         }
 
+        if ($mergedConfig['notifier']['enabled']) {
+            $loader->load('notifier.xml');
+
+            $container
+                ->getDefinition(NotifierHandler::class)
+                ->setArguments([
+                    new Reference($mergedConfig['notifier']['service']),
+                    $mergedConfig['notifier']['default_channel'],
+                    $mergedConfig['notifier']['default_email'],
+                    $mergedConfig['notifier']['default_phone'],
+                    $mergedConfig['notifier']['subject_prefix'],
+                ])
+            ;
+        }
+
         $this->registerScheduleExtensions($mergedConfig, $container);
+
+        if (\method_exists($container, 'registerAttributeForAutoconfiguration')) {
+            $container->registerAttributeForAutoconfiguration(
+                AsScheduledTask::class,
+                static function(Definition $definition, AsScheduledTask $attribute) {
+                    $definition->addTag('schedule.service', \get_object_vars($attribute));
+                }
+            );
+        }
     }
 
     private function registerScheduleExtensions(array $config, ContainerBuilder $container): void
@@ -162,6 +198,19 @@ final class ZenstruckScheduleExtension extends ConfigurableExtension
             ]);
 
             $definitions[$idPrefix.'email_on_failure'] = $definition;
+        }
+
+        if ($config['schedule_extensions']['notify_on_failure']['enabled']) {
+            $definition = new Definition(NotifierExtension::class);
+            $definition->setFactory([NotifierExtension::class, 'scheduleFailure']);
+            $definition->setArguments([
+                $config['schedule_extensions']['notify_on_failure']['channel'],
+                $config['schedule_extensions']['notify_on_failure']['email'],
+                $config['schedule_extensions']['notify_on_failure']['phone'],
+                $config['schedule_extensions']['notify_on_failure']['subject'],
+            ]);
+
+            $definitions[$idPrefix.'notify_on_failure'] = $definition;
         }
 
         $pingMap = [

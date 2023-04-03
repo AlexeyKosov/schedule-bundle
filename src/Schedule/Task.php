@@ -1,11 +1,22 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\Schedule;
 
+use Symfony\Component\Mime\Address;
 use Zenstruck\ScheduleBundle\Schedule\Exception\SkipTask;
 use Zenstruck\ScheduleBundle\Schedule\Extension\BetweenTimeExtension;
 use Zenstruck\ScheduleBundle\Schedule\Extension\CallbackExtension;
 use Zenstruck\ScheduleBundle\Schedule\Extension\EmailExtension;
+use Zenstruck\ScheduleBundle\Schedule\Extension\NotifierExtension;
 use Zenstruck\ScheduleBundle\Schedule\Extension\PingExtension;
 use Zenstruck\ScheduleBundle\Schedule\Extension\SingleServerExtension;
 use Zenstruck\ScheduleBundle\Schedule\Extension\WithoutOverlappingExtension;
@@ -27,13 +38,11 @@ abstract class Task
 
     private const DEFAULT_EXPRESSION = '* * * * *';
 
-    private $description;
-    private $expression = self::DEFAULT_EXPRESSION;
-    private $timezone;
+    private string $expression = self::DEFAULT_EXPRESSION;
+    private ?\DateTimeZone $timezone = null;
 
-    public function __construct(string $description)
+    public function __construct(private string $description)
     {
-        $this->description = $description;
     }
 
     final public function __toString(): string
@@ -56,6 +65,9 @@ abstract class Task
         return $this->description;
     }
 
+    /**
+     * @return array<string,string>
+     */
     public function getContext(): array
     {
         return [];
@@ -125,9 +137,7 @@ abstract class Task
      */
     final public function when(string $description, $callback): self
     {
-        $callback = \is_callable($callback) ? $callback : function() use ($callback) {
-            return (bool) $callback;
-        };
+        $callback = \is_callable($callback) ? $callback : fn() => (bool) $callback;
 
         return $this->filter(function(TaskRunContext $context) use ($callback, $description) {
             if (!$callback($context)) {
@@ -144,9 +154,7 @@ abstract class Task
      */
     final public function skip(string $description, $callback): self
     {
-        $callback = \is_callable($callback) ? $callback : function() use ($callback) {
-            return (bool) $callback;
-        };
+        $callback = \is_callable($callback) ? $callback : fn() => (bool) $callback;
 
         return $this->filter(function(TaskRunContext $context) use ($callback, $description) {
             if ($callback($context)) {
@@ -259,9 +267,9 @@ abstract class Task
      * Email task detail after run (on success or failure, not if skipped).
      * Be sure to configure `zenstruck_schedule.mailer`.
      *
-     * @param string|string[] $to       Email address(es)
-     * @param callable|null   $callback Add your own headers etc
-     *                                  Receives an instance of \Symfony\Component\Mime\Email
+     * @param string|Address|string[]|Address[]|null $to       Email address(es)
+     * @param callable|null                          $callback Add your own headers etc
+     *                                                         Receives an instance of \Symfony\Component\Mime\Email
      */
     final public function emailAfter($to = null, ?string $subject = null, ?callable $callback = null): self
     {
@@ -269,7 +277,24 @@ abstract class Task
     }
 
     /**
+     * Send notification with task detail after run (on success or failure, not if skipped).
+     * Be sure to configure `zenstruck_schedule.notifier`.
+     *
+     * @param string|string[] $channel  Channel to send notification to (E.G "chat/slack")
+     * @param string|null     $email    Email address for email notification
+     * @param string|null     $phone    Phone number for SMS notification
+     * @param callable|null   $callback Customise the notification
+     *                                  Receives an instance of \Symfony\Component\Notification\Notification
+     */
+    final public function notifyAfter($channel = null, ?string $email = null, ?string $phone = null, ?string $subject = null, ?callable $callback = null): self
+    {
+        return $this->addExtension(NotifierExtension::taskAfter($channel, $email, $phone, $subject, $callback));
+    }
+
+    /**
      * Alias for emailAfter().
+     *
+     * @param string|Address|string[]|Address[]|null $to Email address(es)
      */
     final public function thenEmail($to = null, ?string $subject = null, ?callable $callback = null): self
     {
@@ -277,16 +302,45 @@ abstract class Task
     }
 
     /**
+     * Alias for notifyAfter().
+     *
+     * @param string|string[] $channel  Channel to send notification to (E.G "chat/slack")
+     * @param string|null     $email    Email address for email notification
+     * @param string|null     $phone    Phone number for SMS notification
+     * @param callable|null   $callback Customise the notification
+     *                                  Receives an instance of \Symfony\Component\Notification\Notification
+     */
+    final public function thenNotify($channel = null, ?string $email = null, ?string $phone = null, ?string $subject = null, ?callable $callback = null): self
+    {
+        return $this->notifyAfter($channel, $email, $phone, $subject, $callback);
+    }
+
+    /**
      * Email task/failure details if failed (not if skipped).
      * Be sure to configure `zenstruck_schedule.mailer`.
      *
-     * @param string|string[] $to       Email address(es)
-     * @param callable|null   $callback Add your own headers etc
-     *                                  Receives an instance of \Symfony\Component\Mime\Email
+     * @param string|Address|string[]|Address[]|null $to       Email address(es)
+     * @param callable|null                          $callback Add your own headers etc
+     *                                                         Receives an instance of \Symfony\Component\Mime\Email
      */
     final public function emailOnFailure($to = null, ?string $subject = null, ?callable $callback = null): self
     {
         return $this->addExtension(EmailExtension::taskFailure($to, $subject, $callback));
+    }
+
+    /**
+     * Send notification with task/failure details if failed (not if skipped).
+     * Be sure to configure `zenstruck_schedule.notifier`.
+     *
+     * @param string|string[] $channel  Channel to send notification to (E.G "chat/slack")
+     * @param string|null     $email    Email address for email notification
+     * @param string|null     $phone    Phone number for SMS notification
+     * @param callable|null   $callback Customise the notification
+     *                                  Receives an instance of \Symfony\Component\Notification\Notification
+     */
+    final public function notifyOnFailure($channel = null, ?string $email = null, ?string $phone = null, ?string $subject = null, ?callable $callback = null): self
+    {
+        return $this->addExtension(NotifierExtension::taskFailure($channel, $email, $phone, $subject, $callback));
     }
 
     /**
@@ -688,8 +742,8 @@ abstract class Task
         return $this->cron(\implode(' ', $segments));
     }
 
-    private function getTimezoneValue(): ?string
+    private function getTimezoneValue(): string
     {
-        return $this->getTimezone() ? $this->getTimezone()->getName() : null;
+        return ($this->getTimezone() ?? new \DateTimeZone(\date_default_timezone_get()))->getName();
     }
 }

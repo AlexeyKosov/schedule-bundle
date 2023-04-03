@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\Schedule\Extension\Handler;
 
 use Symfony\Component\Mailer\MailerInterface;
@@ -19,9 +28,18 @@ use Zenstruck\ScheduleBundle\Schedule\Task\TaskRunContext;
  */
 final class EmailHandler extends ExtensionHandler
 {
+    use Schedule\TaskOutput;
+
+    /** @var MailerInterface */
     private $mailer;
+
+    /** @var string|null */
     private $defaultFrom;
+
+    /** @var string|null */
     private $defaultTo;
+
+    /** @var string|null */
     private $subjectPrefix;
 
     public function __construct(MailerInterface $mailer, ?string $defaultFrom = null, ?string $defaultTo = null, ?string $subjectPrefix = null)
@@ -90,27 +108,6 @@ final class EmailHandler extends ExtensionHandler
         $email->text($text);
 
         $this->mailer->send($email);
-    }
-
-    private function getTaskOutput(Result $result, ScheduleRunContext $context): string
-    {
-        $output = '';
-
-        if ($context->isForceRun()) {
-            $output = "!! This task was force run !!\n\n";
-        }
-
-        $output .= \sprintf("Result: \"%s\"\n\nTask ID: %s", $result, $result->getTask()->getId());
-
-        if ($result->getOutput()) {
-            $output .= "\n\n## Task Output:\n\n{$result->getOutput()}";
-        }
-
-        if ($result->isException()) {
-            $output .= "\n\n## Exception:\n\n{$result->getException()}";
-        }
-
-        return $output;
     }
 
     private function sendTaskEmail(EmailExtension $extension, Result $result, ScheduleRunContext $context): void

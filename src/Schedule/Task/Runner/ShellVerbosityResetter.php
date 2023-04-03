@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\Schedule\Task\Runner;
 
 /**
@@ -9,13 +18,20 @@ namespace Zenstruck\ScheduleBundle\Schedule\Task\Runner;
  */
 final class ShellVerbosityResetter
 {
+    /** @var false|string */
     private $var;
+
+    /** @var false|string */
     private $env;
+
+    /** @var false|string */
     private $server;
 
     public function __construct()
     {
-        $this->var = \getenv('SHELL_VERBOSITY');
+        $var = \getenv('SHELL_VERBOSITY');
+
+        $this->var = \is_string($var) ? $var : false;
         $this->env = $_ENV['SHELL_VERBOSITY'] ?? false;
         $this->server = $_SERVER['SHELL_VERBOSITY'] ?? false;
     }

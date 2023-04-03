@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\Tests\Schedule;
 
 use PHPUnit\Framework\TestCase;
@@ -20,7 +29,10 @@ final class SelfSchedulingCommandTest extends TestCase
     public function commands_can_self_schedule()
     {
         $command = new class() extends Command implements SelfSchedulingCommand {
-            protected static $defaultName = 'my:command';
+            public static function getDefaultName(): string
+            {
+                return 'my:command';
+            }
 
             public function schedule(CommandTask $task): void
             {

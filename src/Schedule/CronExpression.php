@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\Schedule;
 
 use Cron\CronExpression as CronSchedule;
@@ -28,9 +37,13 @@ final class CronExpression
         '#hourly' => '# * * * *',
         '#daily' => '# # * * *',
         '#weekly' => '# # * * #',
+        '#weekly@midnight' => '# #(0-2) * * #',
         '#monthly' => '# # # * *',
+        '#monthly@midnight' => '# #(0-2) # * *',
         '#annually' => '# # # # *',
+        '#annually@midnight' => '# #(0-2) # # *',
         '#yearly' => '# # # # *',
+        '#yearly@midnight' => '# #(0-2) # # *',
         '#midnight' => '# #(0-2) * * *',
     ];
 
@@ -42,9 +55,16 @@ final class CronExpression
         self::DOW => [0, 6],
     ];
 
+    /** @var string */
     private $value;
+
+    /** @var string[] */
     private $parts;
+
+    /** @var string */
     private $context;
+
+    /** @var string */
     private $parsedValue;
 
     public function __construct(string $value, string $context)
@@ -124,6 +144,6 @@ final class CronExpression
     {
         $possibleValues = \range($start, $end);
 
-        return $possibleValues[(int) \fmod(\hexdec(\mb_substr(\md5($this->context), 0, 10)), \count($possibleValues))];
+        return (string) $possibleValues[(int) \fmod(\hexdec(\mb_substr(\md5($this->context), 0, 10)), \count($possibleValues))];
     }
 }

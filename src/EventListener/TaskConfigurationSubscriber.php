@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\EventListener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -21,6 +30,7 @@ final class TaskConfigurationSubscriber implements EventSubscriberInterface
     private const PROCESS_TASK_PREFIX = 'bash:';
     private const PING_TASK_PREFIX = 'ping:';
 
+    /** @var array */
     private $config;
 
     public function __construct(array $config)

@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\Tests\Command;
 
 use PHPUnit\Framework\TestCase;
@@ -178,7 +187,10 @@ final class ScheduleListCommandTest extends TestCase
 
         $application = new Application();
         $application->add(new class() extends Command {
-            protected static $defaultName = 'my:command';
+            public static function getDefaultName(): string
+            {
+                return 'my:command';
+            }
 
             protected function configure()
             {

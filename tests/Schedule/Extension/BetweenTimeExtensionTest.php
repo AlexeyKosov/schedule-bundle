@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\Tests\Schedule\Extension;
 
 use PHPUnit\Framework\TestCase;
@@ -13,6 +22,7 @@ final class BetweenTimeExtensionTest extends TestCase
 {
     /**
      * @test
+     *
      * @dataProvider onlyBetweenExtensionSkipProvider
      */
     public function only_between_extension_skip($start, $end, $inclusive)
@@ -39,6 +49,7 @@ final class BetweenTimeExtensionTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider onlyBetweenExtensionRunProvider
      */
     public function only_between_extension_run($start, $end, $inclusive)
@@ -64,6 +75,7 @@ final class BetweenTimeExtensionTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider unlessBetweenExtensionSkipProvider
      */
     public function unless_between_extension_skip($start, $end, $inclusive)
@@ -90,6 +102,7 @@ final class BetweenTimeExtensionTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider unlessBetweenExtensionRunProvider
      */
     public function unless_between_extension_run($start, $end, $inclusive)

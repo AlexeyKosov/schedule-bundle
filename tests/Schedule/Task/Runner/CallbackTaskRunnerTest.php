@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\Tests\Schedule\Task\Runner;
 
 use PHPUnit\Framework\TestCase;
@@ -24,11 +33,12 @@ final class CallbackTaskRunnerTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider outputProvider
      */
     public function stringifies_output($output, $expectedOutput)
     {
-        $result = (new CallbackTaskRunner())(new CallbackTask(function() use ($output) { return $output; }));
+        $result = (new CallbackTaskRunner())(new CallbackTask(fn() => $output));
 
         $this->assertTrue($result->isSuccessful());
         $this->assertSame($expectedOutput, $result->getOutput());

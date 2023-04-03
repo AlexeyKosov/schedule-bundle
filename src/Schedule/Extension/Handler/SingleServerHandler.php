@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\Schedule\Extension\Handler;
 
 use Symfony\Component\Lock\LockFactory;
@@ -15,6 +24,7 @@ use Zenstruck\ScheduleBundle\Schedule\Task\TaskRunContext;
  */
 final class SingleServerHandler extends ExtensionHandler
 {
+    /** @var LockFactory */
     private $lockFactory;
 
     public function __construct(LockFactory $lockFactory)

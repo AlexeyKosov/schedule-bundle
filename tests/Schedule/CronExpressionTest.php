@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\Tests\Schedule;
 
 use PHPUnit\Framework\TestCase;
@@ -12,6 +21,7 @@ final class CronExpressionTest extends TestCase
 {
     /**
      * @test
+     *
      * @dataProvider standardExpressionProvider
      */
     public function can_handle_standard_expressions($expression)
@@ -45,6 +55,7 @@ final class CronExpressionTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider hashedExpressionProvider
      */
     public function can_handle_hashed_expressions($value, $expected)
@@ -75,9 +86,13 @@ final class CronExpressionTest extends TestCase
             ['#hourly', '56 * * * *'],
             ['#daily', '56 20 * * *'],
             ['#weekly', '56 20 * * 0'],
+            ['#weekly@midnight', '56 2 * * 0'],
             ['#monthly', '56 20 1 * *'],
+            ['#monthly@midnight', '56 2 1 * *'],
             ['#yearly', '56 20 1 9 *'],
+            ['#yearly@midnight', '56 2 1 9 *'],
             ['#annually', '56 20 1 9 *'],
+            ['#annually@midnight', '56 2 1 9 *'],
             ['#midnight', '56 2 * * *'],
             ['#(1-15) * * * *', '12 * * * *'],
             ['#(1-15) * * * #(3-5)', '12 * * * 5'],
@@ -87,6 +102,7 @@ final class CronExpressionTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider invalidExpressionProvider
      */
     public function cannot_set_invalid_cron_expression($value)

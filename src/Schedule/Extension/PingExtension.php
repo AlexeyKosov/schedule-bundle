@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\Schedule\Extension;
 
 use Zenstruck\ScheduleBundle\Schedule;
@@ -11,9 +20,16 @@ use Zenstruck\ScheduleBundle\Schedule\Task;
  */
 final class PingExtension implements HasMissingDependencyMessage
 {
+    /** @var string */
     private $hook;
+
+    /** @var string */
     private $url;
+
+    /** @var string */
     private $method;
+
+    /** @var array */
     private $options;
 
     /**

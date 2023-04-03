@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\Schedule\Extension;
 
 use Zenstruck\ScheduleBundle\Schedule\Exception\SkipTask;
@@ -9,9 +18,16 @@ use Zenstruck\ScheduleBundle\Schedule\Exception\SkipTask;
  */
 final class BetweenTimeExtension
 {
+    /** @var string */
     private $startTime;
+
+    /** @var string */
     private $endTime;
+
+    /** @var bool */
     private $within;
+
+    /** @var bool */
     private $inclusive;
 
     private function __construct(string $startTime, string $endTime, bool $within, bool $inclusive)

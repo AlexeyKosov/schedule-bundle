@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
@@ -19,11 +28,12 @@ final class ScheduleBuilderKernelPass implements CompilerPassInterface
 
         $kernel = $container->getDefinition('kernel');
 
-        if (null === $kernel->getClass()) {
+        if (null === $class = $kernel->getClass()) {
             return;
         }
 
-        if ((new \ReflectionClass($kernel->getClass()))->implementsInterface(ScheduleBuilder::class)) {
+        /** @var class-string $class */
+        if ((new \ReflectionClass($class))->implementsInterface(ScheduleBuilder::class)) {
             $kernel->addTag('schedule.builder');
         }
     }

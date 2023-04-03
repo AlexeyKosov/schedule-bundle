@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\Schedule\Task\Runner;
 
 use Symfony\Component\Messenger\Envelope;
@@ -19,6 +28,7 @@ use Zenstruck\ScheduleBundle\Schedule\Task\TaskRunner;
  */
 final class MessageTaskRunner implements TaskRunner
 {
+    /** @var MessageBusInterface */
     private $bus;
 
     public function __construct(MessageBusInterface $bus)
@@ -27,7 +37,7 @@ final class MessageTaskRunner implements TaskRunner
     }
 
     /**
-     * @param MessageTask|Task $task
+     * @param MessageTask $task
      */
     public function __invoke(Task $task): Result
     {
@@ -48,17 +58,20 @@ final class MessageTaskRunner implements TaskRunner
         return $task instanceof MessageTask;
     }
 
+    /**
+     * @return string[]
+     */
     private function handlerOutput(Envelope $envelope): array
     {
         $output = [];
 
         foreach ($envelope->all(HandledStamp::class) as $stamp) {
-            /* @var HandledStamp $stamp */
+            /** @var HandledStamp $stamp */
             $output[] = \sprintf('Handled by: "%s", return: %s', $stamp->getHandlerName(), $this->handledStampReturn($stamp));
         }
 
         foreach ($envelope->all(SentStamp::class) as $stamp) {
-            /* @var SentStamp $stamp */
+            /** @var SentStamp $stamp */
             $output[] = \sprintf('Sent to: "%s"', $stamp->getSenderClass());
         }
 
@@ -74,9 +87,9 @@ final class MessageTaskRunner implements TaskRunner
                 return '(none)';
 
             case \is_scalar($result):
-                return \sprintf('(%s) "%s"', get_debug_type($result), $result);
+                return \sprintf('(%s) "%s"', \get_debug_type($result), $result);
         }
 
-        return \sprintf('(%s)', get_debug_type($result));
+        return \sprintf('(%s)', \get_debug_type($result));
     }
 }

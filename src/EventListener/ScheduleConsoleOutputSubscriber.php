@@ -1,8 +1,18 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\EventListener;
 
 use Symfony\Component\Console\Style\OutputStyle;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Zenstruck\ScheduleBundle\Event\AfterScheduleEvent;
 use Zenstruck\ScheduleBundle\Event\AfterTaskEvent;
@@ -15,6 +25,7 @@ use Zenstruck\ScheduleBundle\Schedule\Task\Result;
  */
 final class ScheduleConsoleOutputSubscriber implements EventSubscriberInterface
 {
+    /** @var OutputStyle */
     private $io;
 
     public function __construct(OutputStyle $io)
@@ -79,7 +90,7 @@ final class ScheduleConsoleOutputSubscriber implements EventSubscriberInterface
         $dueTaskCount = \count($context->dueTasks());
 
         if ($dueTaskCount > 0) {
-            $this->io->comment(\sprintf(
+            $this->io->{$this->io instanceof SymfonyStyle ? 'comment' : 'text'}(\sprintf(
                 '%sRunning <info>%s</info> %stask%s. (%s total tasks)',
                 $context->isForceRun() ? '<error>Force</error> ' : '',
                 $dueTaskCount,

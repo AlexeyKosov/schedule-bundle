@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\Schedule\Extension;
 
 use Zenstruck\ScheduleBundle\Schedule\Exception\MissingDependency;
@@ -13,11 +22,14 @@ use Zenstruck\ScheduleBundle\Schedule\Task\TaskRunContext;
  */
 final class ExtensionHandlerRegistry
 {
+    /** @var iterable<ExtensionHandler> */
     private $handlers;
+
+    /** @var array<string,ExtensionHandler> */
     private $handlerCache;
 
     /**
-     * @param ExtensionHandler[] $handlers
+     * @param iterable<ExtensionHandler> $handlers
      */
     public function __construct(iterable $handlers)
     {
@@ -30,7 +42,7 @@ final class ExtensionHandlerRegistry
 
     public function handlerFor(object $extension): ExtensionHandler
     {
-        $class = \get_class($extension);
+        $class = $extension::class;
 
         if (isset($this->handlerCache[$class])) {
             return $this->handlerCache[$class];

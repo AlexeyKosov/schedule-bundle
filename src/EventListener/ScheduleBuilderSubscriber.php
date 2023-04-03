@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\EventListener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -11,10 +20,11 @@ use Zenstruck\ScheduleBundle\Schedule\ScheduleBuilder;
  */
 final class ScheduleBuilderSubscriber implements EventSubscriberInterface
 {
+    /** @var iterable<ScheduleBuilder> */
     private $builders;
 
     /**
-     * @param ScheduleBuilder[] $builders
+     * @param iterable<ScheduleBuilder> $builders
      */
     public function __construct(iterable $builders)
     {

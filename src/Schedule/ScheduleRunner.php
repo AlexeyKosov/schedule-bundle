@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\Schedule;
 
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -22,10 +31,18 @@ use Zenstruck\ScheduleBundle\Schedule\Task\TaskRunner;
  */
 final class ScheduleRunner
 {
+    /** @var iterable<TaskRunner> */
     private $taskRunners;
+
+    /** @var ExtensionHandlerRegistry */
     private $extensions;
+
+    /** @var EventDispatcherInterface */
     private $dispatcher;
 
+    /**
+     * @param iterable<TaskRunner> $taskRunners
+     */
     public function __construct(iterable $taskRunners, ExtensionHandlerRegistry $handlerRegistry, EventDispatcherInterface $dispatcher)
     {
         $this->taskRunners = $taskRunners;
@@ -117,13 +134,14 @@ final class ScheduleRunner
         }
     }
 
+    /**
+     * @param string[] $taskIds
+     */
     private function createRunContext(array $taskIds): ScheduleRunContext
     {
         $schedule = $this->buildSchedule();
 
-        $tasks = \array_map(function(string $id) use ($schedule) {
-            return $schedule->getTask($id);
-        }, $taskIds);
+        $tasks = \array_map(fn(string $id) => $schedule->getTask($id), $taskIds);
 
         return new ScheduleRunContext($schedule, ...$tasks);
     }

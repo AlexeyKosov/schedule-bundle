@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\Schedule\Task\Runner;
 
 use Zenstruck\ScheduleBundle\Schedule\Task;
@@ -13,7 +22,7 @@ use Zenstruck\ScheduleBundle\Schedule\Task\TaskRunner;
 final class CallbackTaskRunner implements TaskRunner
 {
     /**
-     * @param CallbackTask|Task $task
+     * @param CallbackTask $task
      */
     public function __invoke(Task $task): Result
     {
@@ -37,7 +46,7 @@ final class CallbackTaskRunner implements TaskRunner
         }
 
         if (\is_scalar($value)) {
-            return $value;
+            return (string) $value;
         }
 
         if (\is_object($value) && \method_exists($value, '__toString')) {
@@ -45,7 +54,7 @@ final class CallbackTaskRunner implements TaskRunner
         }
 
         if (\is_object($value)) {
-            return '[object] '.\get_class($value);
+            return '[object] '.$value::class;
         }
 
         return '('.\gettype($value).')';

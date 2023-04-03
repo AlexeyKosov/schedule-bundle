@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\Schedule\Extension;
 
 use Symfony\Component\Mime\Address;
@@ -13,7 +22,10 @@ use Zenstruck\ScheduleBundle\Schedule\Task;
  */
 final class EmailExtension implements HasMissingDependencyMessage
 {
+    /** @var string */
     private $hook;
+
+    /** @var Email */
     private $email;
 
     /**
@@ -48,22 +60,31 @@ final class EmailExtension implements HasMissingDependencyMessage
             return "{$this->hook}, email output";
         }
 
-        $to = \array_map(function(Address $address) { return $address->toString(); }, $to);
+        $to = \array_map(fn(Address $address) => $address->toString(), $to);
         $to = \implode('; ', $to);
 
         return "{$this->hook}, email output to \"{$to}\"";
     }
 
+    /**
+     * @param string|Address|string[]|Address[]|null $to
+     */
     public static function taskAfter($to = null, ?string $subject = null, ?callable $callback = null): self
     {
         return new self(Task::AFTER, $to, $subject, $callback);
     }
 
+    /**
+     * @param string|Address|string[]|Address[]|null $to
+     */
     public static function taskFailure($to = null, ?string $subject = null, ?callable $callback = null): self
     {
         return new self(Task::FAILURE, $to, $subject, $callback);
     }
 
+    /**
+     * @param string|Address|string[]|Address[]|null $to
+     */
     public static function scheduleFailure($to = null, ?string $subject = null, ?callable $callback = null): self
     {
         return new self(Schedule::FAILURE, $to, $subject, $callback);

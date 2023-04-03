@@ -1,10 +1,20 @@
 <?php
 
+/*
+ * This file is part of the zenstruck/schedule-bundle package.
+ *
+ * (c) Kevin Bond <kevinbond@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Zenstruck\ScheduleBundle\Tests\Schedule\Task;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Command\LazyCommand;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\Console\Input\StringInput;
 use Zenstruck\ScheduleBundle\Schedule\Task\CommandTask;
@@ -60,6 +70,7 @@ final class CommandTaskTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider commandNameProvider
      */
     public function can_create_input($commandName)
@@ -94,9 +105,44 @@ final class CommandTaskTest extends TestCase
 
         $task->createCommandInput(new Application());
     }
+
+    /**
+     * @test
+     */
+    public function can_create_from_lazy_command()
+    {
+        if (!\class_exists(LazyCommand::class)) {
+            $this->markTestSkipped('Not available before Symfony 5.3.');
+
+            return;
+        }
+        $dummyCommand = new LazyDummyCommand();
+        $command = new LazyCommand($dummyCommand->getName(), $dummyCommand->getAliases(), $dummyCommand->getDescription(), $dummyCommand->isHidden(), fn() => $dummyCommand);
+
+        $application = new Application();
+        $application->add($command);
+
+        $task = new CommandTask(LazyDummyCommand::class);
+
+        $command = $task->createCommand($application);
+
+        $this->assertInstanceOf(Command::class, $command);
+        $this->assertSame('lazy:dummy:command', (string) $command->getName());
+        $this->assertInstanceOf(LazyCommand::class, $application->all()['lazy:dummy:command']);
+    }
 }
 
 final class DummyCommand extends Command
 {
-    protected static $defaultName = 'dummy:command';
+    public static function getDefaultName(): string
+    {
+        return 'dummy:command';
+    }
+}
+final class LazyDummyCommand extends Command
+{
+    public static function getDefaultName(): string
+    {
+        return 'lazy:dummy:command';
+    }
 }
