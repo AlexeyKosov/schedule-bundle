@@ -11,6 +11,7 @@
 
 namespace Zenstruck\ScheduleBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,6 +24,7 @@ use Zenstruck\ScheduleBundle\Schedule\ScheduleRunner;
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */
+#[AsCommand('schedule:run')]
 final class ScheduleRunCommand extends Command
 {
     /** @var ScheduleRunner */
@@ -37,11 +39,6 @@ final class ScheduleRunCommand extends Command
         $this->dispatcher = $dispatcher;
 
         parent::__construct();
-    }
-
-    public static function getDefaultName(): string
-    {
-        return 'schedule:run';
     }
 
     public static function getDefaultDescription(): string

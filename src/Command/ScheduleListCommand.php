@@ -13,6 +13,7 @@ namespace Zenstruck\ScheduleBundle\Command;
 
 use Lorisleiva\CronTranslator\CronParsingException;
 use Lorisleiva\CronTranslator\CronTranslator;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\StringInput;
@@ -27,6 +28,7 @@ use Zenstruck\ScheduleBundle\Schedule\Task\CommandTask;
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */
+#[AsCommand('schedule:list')]
 final class ScheduleListCommand extends Command
 {
     /** @var ScheduleRunner */
@@ -41,11 +43,6 @@ final class ScheduleListCommand extends Command
         $this->handlerRegistry = $handlerRegistry;
 
         parent::__construct();
-    }
-
-    public static function getDefaultName(): string
-    {
-        return 'schedule:list';
     }
 
     public static function getDefaultDescription(): string
