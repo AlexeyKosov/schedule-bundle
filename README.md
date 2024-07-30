@@ -205,7 +205,6 @@ zenstruck_schedule:
 
             # Email subject (leave blank to use extension default)
             subject:              null
-              3600
 
         # Send notification if schedule fails (alternatively enable by passing a channel)
         notify_on_failure:
