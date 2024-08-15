@@ -3,20 +3,18 @@ declare(strict_types=1);
 
 namespace Zenstruck\ScheduleBundle\MessageHandler;
 
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 use Zenstruck\ScheduleBundle\Message\RunTaskMessage;
 use Zenstruck\ScheduleBundle\Schedule\ScheduleRunner;
 use Zenstruck\ScheduleBundle\Schedule\Task\MessageTask;
 
-class RunTaskMessageHandler implements MessageHandlerInterface
+#[AsMessageHandler]
+class RunTaskMessageHandler
 {
-    /** @var ScheduleRunner */
-    protected $scheduleRunner;
-
-    public function __construct(ScheduleRunner $scheduleRunner)
-    {
-        $this->scheduleRunner = $scheduleRunner;
+    public function __construct(
+        protected ScheduleRunner $scheduleRunner,
+    ) {
     }
 
     public function __invoke(RunTaskMessage $message): ?string

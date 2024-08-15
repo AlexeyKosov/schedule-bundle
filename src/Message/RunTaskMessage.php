@@ -5,12 +5,9 @@ namespace Zenstruck\ScheduleBundle\Message;
 
 class RunTaskMessage
 {
-    /** @var string */
-    protected $taskId;
-
-    public function __construct(string $taskId)
-    {
-        $this->taskId = $taskId;
+    public function __construct(
+        protected string $taskId,
+    ) {
     }
 
     /**
