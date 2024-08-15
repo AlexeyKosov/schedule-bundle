@@ -48,7 +48,7 @@ final class NotifierHandler extends ExtensionHandler
     private $defaultChannel;
 
     /**
-     * @param string|string[]$defaultChannel
+     * @param string|string[] $defaultChannel
      */
     public function __construct(NotifierInterface $notifier, $defaultChannel = null, ?string $defaultEmail = null, ?string $defaultPhone = null, ?string $subjectPrefix = null)
     {
@@ -129,7 +129,7 @@ final class NotifierHandler extends ExtensionHandler
 
         $this->prefixSubject($notification, \sprintf('[Scheduled Task %s] %s',
             $result->isFailure() ? 'Failed' : 'Succeeded',
-            $result->getTask()
+            $result->getTask(),
         ));
 
         if ($result->isFailure()) {

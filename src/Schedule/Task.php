@@ -40,6 +40,7 @@ abstract class Task
 
     private string $expression = self::DEFAULT_EXPRESSION;
     private ?\DateTimeZone $timezone = null;
+    private ?string $customId = null;
 
     public function __construct(private string $description)
     {
@@ -47,6 +48,10 @@ abstract class Task
 
     final public function __toString(): string
     {
+        if ($this->customId) {
+            return "{$this->getType()} `{$this->customId}`: {$this->getDescription()}";
+        }
+
         return "{$this->getType()}: {$this->getDescription()}";
     }
 
@@ -57,7 +62,12 @@ abstract class Task
 
     final public function getId(): string
     {
-        return \sha1(static::class.$this->getExpression().$this->getDescription());
+        return $this->customId ?? \sha1(static::class.$this->getExpression().$this->getDescription());
+    }
+
+    final public function hasCustomIdentifier(): bool
+    {
+        return null !== $this->customId;
     }
 
     final public function getDescription(): string
@@ -94,6 +104,16 @@ abstract class Task
     }
 
     /**
+     * Set a unique identifier for this task.
+     */
+    final public function identifiedBy(string $id): self
+    {
+        $this->customId = $id;
+
+        return $this;
+    }
+
+    /**
      * Set a unique description for this task.
      */
     final public function description(string $description): self
@@ -124,9 +144,9 @@ abstract class Task
      *
      * @param callable $callback Receives an instance of \Zenstruck\ScheduleBundle\Schedule\Task\TaskRunContext
      */
-    final public function filter(callable $callback): self
+    final public function filter(callable $callback, ?string $description = null): self
     {
-        return $this->addExtension(CallbackExtension::taskFilter($callback));
+        return $this->addExtension(CallbackExtension::taskFilter($callback, $description));
     }
 
     /**
@@ -168,9 +188,9 @@ abstract class Task
      *
      * @param callable $callback Receives an instance of \Zenstruck\ScheduleBundle\Schedule\Task\TaskRunContext
      */
-    final public function before(callable $callback): self
+    final public function before(callable $callback, ?string $description = null): self
     {
-        return $this->addExtension(CallbackExtension::taskBefore($callback));
+        return $this->addExtension(CallbackExtension::taskBefore($callback, $description));
     }
 
     /**
@@ -178,9 +198,9 @@ abstract class Task
      *
      * @param callable $callback Receives an instance of \Zenstruck\ScheduleBundle\Schedule\Task\TaskRunContext
      */
-    final public function after(callable $callback): self
+    final public function after(callable $callback, ?string $description = null): self
     {
-        return $this->addExtension(CallbackExtension::taskAfter($callback));
+        return $this->addExtension(CallbackExtension::taskAfter($callback, $description));
     }
 
     /**
@@ -196,9 +216,9 @@ abstract class Task
      *
      * @param callable $callback Receives an instance of \Zenstruck\ScheduleBundle\Schedule\Task\TaskRunContext
      */
-    final public function onSuccess(callable $callback): self
+    final public function onSuccess(callable $callback, ?string $description = null): self
     {
-        return $this->addExtension(CallbackExtension::taskSuccess($callback));
+        return $this->addExtension(CallbackExtension::taskSuccess($callback, $description));
     }
 
     /**
@@ -206,9 +226,9 @@ abstract class Task
      *
      * @param callable $callback Receives an instance of \Zenstruck\ScheduleBundle\Schedule\Task\TaskRunContext
      */
-    final public function onFailure(callable $callback): self
+    final public function onFailure(callable $callback, ?string $description = null): self
     {
-        return $this->addExtension(CallbackExtension::taskFailure($callback));
+        return $this->addExtension(CallbackExtension::taskFailure($callback, $description));
     }
 
     /**

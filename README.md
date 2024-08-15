@@ -1,6 +1,6 @@
 # The ScheduleBundle
 
-[![CI](https://github.com/zenstruck/schedule-bundle/workflows/CI/badge.svg)](https://github.com/zenstruck/schedule-bundle/actions?query=workflow%3ACI)
+[![CI](https://github.com/zenstruck/schedule-bundle/actions/workflows/ci.yml/badge.svg)](https://github.com/zenstruck/schedule-bundle/actions/workflows/ci.yml)
 [![Code Coverage](https://codecov.io/gh/zenstruck/schedule-bundle/branch/master/graph/badge.svg?token=SZE54O8YST)](https://codecov.io/gh/zenstruck/schedule-bundle)
 [![Latest Version](https://img.shields.io/packagist/v/zenstruck/schedule-bundle.svg)](https://packagist.org/packages/zenstruck/schedule-bundle)
 [![Total Downloads](https://img.shields.io/packagist/dt/zenstruck/schedule-bundle.svg)](https://packagist.org/packages/zenstruck/schedule-bundle)
@@ -76,7 +76,7 @@ Task Scheduling feature](https://laravel.com/docs/master/scheduling).
 ## Installation
 
 ```console
-$ composer require zenstruck/schedule-bundle
+composer require zenstruck/schedule-bundle
 ```
 
 *If not using Symfony Flex, be sure to enable the bundle.*
@@ -116,7 +116,7 @@ $ composer require zenstruck/schedule-bundle
 2. List your tasks to diagnose any problems:
 
     ```console
-    $ php bin/console schedule:list
+    php bin/console schedule:list
     ```
 
 3. Add the following Cron job on your server running every minute:
@@ -205,7 +205,6 @@ zenstruck_schedule:
 
             # Email subject (leave blank to use extension default)
             subject:              null
-              3600
 
         # Send notification if schedule fails (alternatively enable by passing a channel)
         notify_on_failure:

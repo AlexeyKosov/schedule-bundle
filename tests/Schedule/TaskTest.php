@@ -67,7 +67,7 @@ final class TaskTest extends TestCase
     {
         $this->assertSame(
             (new \DateTime('1st Jan next year'))->getTimestamp(),
-            self::task()->yearly()->getNextRun()->getTimestamp()
+            self::task()->yearly()->getNextRun()->getTimestamp(),
         );
     }
 
@@ -164,6 +164,15 @@ final class TaskTest extends TestCase
         $this->assertNotSame(self::task('task1')->getId(), self::task('task2')->getId());
         $this->assertNotSame((new class('task') extends Task {
         })->getId(), self::task('task')->getId());
+    }
+
+    /**
+     * @test
+     */
+    public function uses_custom_id_when_set()
+    {
+        $this->assertSame('task1', self::task()->identifiedBy('task1')->getId());
+        $this->assertNotSame(self::task()->identifiedBy('task1')->getId(), self::task()->getId());
     }
 
     /**

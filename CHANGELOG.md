@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## [v1.8.0](https://github.com/zenstruck/schedule-bundle/releases/tag/v1.8.0)
+
+November 16th, 2023 - [v1.7.0...v1.8.0](https://github.com/zenstruck/schedule-bundle/compare/v1.7.0...v1.8.0)
+
+* eaeac48 feat: Symfony 7 support (#84) by @kbond
+* 9e78eca feat: drop support for Symfony 4.4 (#84) by @kbond
+
+## [v1.7.0](https://github.com/zenstruck/schedule-bundle/releases/tag/v1.7.0)
+
+June 5th, 2023 - [v1.6.0...v1.7.0](https://github.com/zenstruck/schedule-bundle/compare/v1.6.0...v1.7.0)
+
+* 6b3389e feat: Add task id to list command output (#82) by @bobvandevijver
+* 8857dd3 feat: Add support for custom task ids (#81) by @bobvandevijver, @kbond
+* 440710e feat: Add optional description to callback extension/task constructors (#80) by @bobvandevijver
+* 7f4b918 fix bug in documentation (#77) by @PhilETaylor
+
 ## [v1.6.0](https://github.com/zenstruck/schedule-bundle/releases/tag/v1.6.0)
 
 March 4th, 2023 - [v1.5.0...v1.6.0](https://github.com/zenstruck/schedule-bundle/compare/v1.5.0...v1.6.0)

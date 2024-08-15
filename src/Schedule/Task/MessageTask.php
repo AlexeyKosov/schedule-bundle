@@ -60,14 +60,16 @@ final class MessageTask extends Task implements HasMissingDependencyMessage
 
     public function getContext(): array
     {
-        $stamps = \array_map(static function(StampInterface $stamp) { return \get_class($stamp); }, $this->stamps);
-
+        $stamps = \array_merge(
+            $this->message instanceof Envelope ? \array_keys($this->message->all()) : [],
+            \array_map(static fn(StampInterface $stamp) => $stamp::class, $this->stamps),
+        );
         $stamps = \array_map(
             static function(string $stamp) {
                 /** @var class-string $stamp */
                 return (new \ReflectionClass($stamp))->getShortName();
             },
-            $stamps
+            $stamps,
         );
         $stamps = \implode(', ', \array_unique($stamps));
 

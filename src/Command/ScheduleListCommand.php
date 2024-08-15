@@ -15,6 +15,8 @@ use Lorisleiva\CronTranslator\CronParsingException;
 use Lorisleiva\CronTranslator\CronTranslator;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\TableCell;
+use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -55,6 +57,7 @@ final class ScheduleListCommand extends Command
         $this
             ->setDescription(self::getDefaultDescription()) // required for Symfony 4.4
             ->addOption('detail', null, null, 'Show detailed task list')
+            ->addOption('with-ids', null, null, 'Show task ids in non-detailed list')
             ->setHelp(<<<EOF
                 Exit code 0: no issues.
                 Exit code 1: some issues.
@@ -75,7 +78,7 @@ final class ScheduleListCommand extends Command
 
         $io->title(\sprintf('<info>%d</info> Scheduled Task%s Configured', \count($schedule->all()), \count($schedule->all()) > 1 ? 's' : ''));
 
-        $exit = $input->getOption('detail') ? $this->renderDetail($schedule, $io) : $this->renderTable($schedule, $io);
+        $exit = $input->getOption('detail') ? $this->renderDetail($schedule, $io) : $this->renderTable($schedule, $io, $input->getOption('with-ids'));
 
         $this->renderExtenstions($io, 'Schedule', $schedule->getExtensions());
 
@@ -154,11 +157,11 @@ final class ScheduleListCommand extends Command
 
         $io->listing(\array_map(
             fn(array $line) => \sprintf('<info>%s:</info> %s', \array_keys($line)[0], \array_values($line)[0]),
-            $list
+            $list,
         ));
     }
 
-    private function renderTable(Schedule $schedule, SymfonyStyle $io): int
+    private function renderTable(Schedule $schedule, SymfonyStyle $io, bool $withIds): int
     {
         /** @var array<\Throwable[]> $taskIssues */
         $taskIssues = [];
@@ -170,16 +173,28 @@ final class ScheduleListCommand extends Command
 
             $rows[] = [
                 \count($issues) ? "<error>[!] {$task->getType()}</error>" : $task->getType(),
-                $this->getHelper('formatter')->truncate($task->getDescription(), 50),
+                $withIds ? $task->getId() : $this->getHelper('formatter')->truncate($task->getDescription(), 50),
                 \count($task->getExtensions()),
                 $this->renderFrequency($task),
                 $task->getNextRun()->format(\DATE_ATOM),
             ];
+            if ($withIds) {
+                $rows[] = [ // Additional row to prevent new line
+                    null,
+                    new TableCell($this->getHelper('formatter')->truncate($task->getDescription(), 120), ['colspan' => 4]),
+                ];
+                $rows[] = new TableSeparator();
+            }
+        }
+
+        if ($withIds) {
+            // Remove last table separator
+            \array_pop($rows);
         }
 
         $taskIssues = \array_merge([], ...$taskIssues);
 
-        $io->table(['Type', 'Description', 'Extensions', 'Frequency', 'Next Run'], $rows);
+        $io->table(['Type', 'ID/Description', 'Extensions', 'Frequency', 'Next Run'], $rows);
 
         if ($issueCount = \count($taskIssues)) {
             $io->warning(\sprintf('%d task issue%s:', $issueCount, $issueCount > 1 ? 's' : ''));
@@ -207,13 +222,13 @@ final class ScheduleListCommand extends Command
                 if (\method_exists($extension, '__toString')) {
                     return \sprintf('%s <comment>(%s)</comment>',
                         \strtr($extension, self::extensionHighlightMap()),
-                        $extension::class
+                        $extension::class,
                     );
                 }
 
                 return $extension::class;
             },
-            $extensions
+            $extensions,
         ));
     }
 
@@ -246,7 +261,14 @@ final class ScheduleListCommand extends Command
 
             $task = $taskGroup[0];
 
-            yield new \LogicException(\sprintf('Task "%s" (%s) is duplicated %d times. Make their descriptions unique to fix.', $task, $task->getExpression(), $count));
+            $description = \sprintf('Task "%s" (%s) is duplicated %d times. ', $task, $task->getExpression(), $count);
+            if ($task->hasCustomIdentifier()) {
+                $description .= 'Make sure to use unique identifiers.';
+            } else {
+                $description .= 'Make their descriptions unique to fix, or set a custom identifier with `identifiedBy`.';
+            }
+
+            yield new \LogicException($description);
         }
     }
 
