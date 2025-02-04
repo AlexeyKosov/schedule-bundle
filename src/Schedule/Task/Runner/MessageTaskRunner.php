@@ -41,7 +41,7 @@ final class MessageTaskRunner implements TaskRunner
      */
     public function __invoke(Task $task): Result
     {
-        $message = new RunTaskMessage($task->getId());
+        $message = new RunTaskMessage($task->getId(), $task->getDescription());
 
         $envelope = $this->bus->dispatch($message, $task->getStamps());
         $output = $this->handlerOutput($envelope);
