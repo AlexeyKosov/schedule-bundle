@@ -51,7 +51,7 @@ final class ScheduleListCommandTest extends TestCase
     public function lists_configured_tasks_and_issues()
     {
         $runner = (new MockScheduleBuilder())
-            ->addBuilder(new class() implements ScheduleBuilder {
+            ->addBuilder(new class implements ScheduleBuilder {
                 public function buildSchedule(Schedule $schedule): void
                 {
                     $schedule->emailOnFailure('admin@example.com');
@@ -92,7 +92,7 @@ final class ScheduleListCommandTest extends TestCase
     public function renders_exception_stack_trace_if_verbose()
     {
         $runner = (new MockScheduleBuilder())
-            ->addBuilder(new class() implements ScheduleBuilder {
+            ->addBuilder(new class implements ScheduleBuilder {
                 public function buildSchedule(Schedule $schedule): void
                 {
                     $schedule->addCommand('my:command')
@@ -129,7 +129,7 @@ final class ScheduleListCommandTest extends TestCase
     public function lists_configured_tasks_and_issues_in_detail()
     {
         $runner = (new MockScheduleBuilder())
-            ->addBuilder(new class() implements ScheduleBuilder {
+            ->addBuilder(new class implements ScheduleBuilder {
                 public function buildSchedule(Schedule $schedule): void
                 {
                     $schedule->emailOnFailure('admin@example.com');
@@ -186,17 +186,14 @@ final class ScheduleListCommandTest extends TestCase
         ;
 
         $application = new Application();
-        $application->add(new class() extends Command {
-            public static function getDefaultName(): string
-            {
-                return 'my:command';
+        $application->add(
+            new class('my:command') extends Command {
+                protected function configure()
+                {
+                    $this->addArgument('arg1');
+                }
             }
-
-            protected function configure()
-            {
-                $this->addArgument('arg1');
-            }
-        });
+        );
         $command = new ScheduleListCommand($runner, new ExtensionHandlerRegistry([]));
         $command->setHelperSet(new HelperSet([new FormatterHelper()]));
         $command->setApplication($application);

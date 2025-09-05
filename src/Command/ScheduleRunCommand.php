@@ -24,7 +24,10 @@ use Zenstruck\ScheduleBundle\Schedule\ScheduleRunner;
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */
-#[AsCommand('schedule:run')]
+#[AsCommand(
+    name: 'schedule:run',
+    description: 'Runs scheduled tasks that are due',
+)]
 final class ScheduleRunCommand extends Command
 {
     /** @var ScheduleRunner */
@@ -41,15 +44,9 @@ final class ScheduleRunCommand extends Command
         parent::__construct();
     }
 
-    public static function getDefaultDescription(): string
-    {
-        return 'Runs scheduled tasks that are due';
-    }
-
     protected function configure(): void
     {
         $this
-            ->setDescription(self::getDefaultDescription()) // required for Symfony 4.4
             ->addArgument('id', InputArgument::IS_ARRAY | InputArgument::OPTIONAL, '(optional) Task ID\'s to "force" run')
             ->setHelp(<<<EOF
                 If no arguments are passed, all the tasks currently due are run. Pass one or
